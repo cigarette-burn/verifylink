@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: verifylink
+    env: go
+    buildCommand: |
+      go mod download && \
+      cd api && \
+      go build -o ../app
+    startCommand: ./app
+    envVars:
+      - key: PORT
+        value: "10000"
+      - key: GOOGLE_API_KEY
+        value: AIzaSyBs96LPZ_DVk5Kmgj30oKh3jYsXlFa5DNA
