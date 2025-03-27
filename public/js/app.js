@@ -1,5 +1,6 @@
 // Анимация элементов при загрузке страницы
 document.addEventListener("DOMContentLoaded", () => {
+  console.log("SecureLink initialized");
   const elements = document.querySelectorAll(".card, .feature");
   elements.forEach((el, index) => {
     el.style.opacity = "0";

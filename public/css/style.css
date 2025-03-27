@@ -1,12 +1,18 @@
 :root {
+  /* Обновленные цвета */
+  --primary: #5e72e4;
+  --primary-dark: #4a5fc1;
+  --danger: #ff4757;
+  --success: #2ed573;
+  --dark: #1e272e;
+  --light: #f8f9fa;
+
+  /* Новые переменные */
+  --glass: rgba(255, 255, 255, 0.12);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --text-light: rgba(255, 255, 255, 0.9);
   --primary: #4361ee;
   --primary-dark: #3a0ca3;
-  --danger: #f72585;
-  --success: #4cc9f0;
-  --dark: #14213d;
-  --light: #f8f9fa;
-  --glass: rgba(255, 255, 255, 0.15);
-  --glass-border: rgba(255, 255, 255, 0.2);
 }
 
 * {
@@ -523,18 +529,4 @@ body {
   100% {
     transform: translateY(0) rotate(360deg);
   }
-}
-:root {
-  /* Обновленные цвета */
-  --primary: #5e72e4;
-  --primary-dark: #4a5fc1;
-  --danger: #ff4757;
-  --success: #2ed573;
-  --dark: #1e272e;
-  --light: #f8f9fa;
-
-  /* Новые переменные */
-  --glass: rgba(255, 255, 255, 0.12);
-  --glass-border: rgba(255, 255, 255, 0.2);
-  --text-light: rgba(255, 255, 255, 0.9);
 }

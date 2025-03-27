@@ -2,23 +2,21 @@
   "version": 2,
   "builds": [
     {
-      "src": "main.go",
+      "src": "api/handler.go",
       "use": "@vercel/go",
       "config": {
-        "distDir": ".",
-        "includeFiles": ["templates/**", "assets/**"]
+        "includeFiles": ["templates/*", "public/**"]
       }
     }
   ],
   "routes": [
     {
-      "src": "/assets/(.*)",
-      "dest": "/assets/$1"
+      "src": "/(css|js)/(.*)",
+      "dest": "/public/$1/$2"
     },
     {
       "src": "/(.*)",
-      "dest": "/",
-      "methods": ["GET", "POST"]
+      "dest": "/api/handler.go"
     }
   ]
 }
