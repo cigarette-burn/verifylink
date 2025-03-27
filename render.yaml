@@ -3,9 +3,16 @@ services:
     name: verifylink
     env: go
     buildCommand: |
-      go mod download && \
-      cd api && \
-      go build -o ../app
+      echo "Установка зависимостей..." &&
+      go mod download &&
+      echo "Копирование шаблонов..." &&
+      mkdir -p templates &&
+      cp -r ./templates/* ./api/templates/ &&
+      echo "Сборка приложения..." &&
+      cd api &&
+      go build -o ../app &&
+      echo "Настройка прав..." &&
+      chmod -R 755 ../templates
     startCommand: ./app
     envVars:
       - key: PORT
