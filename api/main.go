@@ -1,4 +1,3 @@
-// api/handler.go
 package main
 
 import (
