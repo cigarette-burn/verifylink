@@ -15,21 +15,43 @@ import (
 	"time"
 )
 
-// Config
+// Config и GoogleClient (остаются без изменений)
 type Config struct {
 	Port           string
 	GoogleAPIKey   string
 	GoogleClientID string
 }
 
-func loadConfig() Config {
-	return Config{
-		Port:           getEnv("PORT", "8080"),
-		GoogleAPIKey:   mustGetEnv("GOOGLE_API_KEY"),
-		GoogleClientID: getEnv("GOOGLE_CLIENT_ID", "my-app"), // Необязательный
-	}
+type GoogleClient struct {
+	apiKey   string
+	clientID string
+	http     *http.Client
 }
 
+// Глобальные переменные (инициализация в init())
+var (
+	tmpl   *template.Template
+	client *GoogleClient
+)
+
+func init() {
+	// Загрузка шаблона
+	var err error
+	tmpl, err = template.ParseFiles(filepath.Join("templates", "index.html"))
+	if err != nil {
+		log.Fatalf("Ошибка загрузки шаблона: %v", err)
+	}
+
+	// Инициализация клиента Google
+	cfg := Config{
+		Port:           getEnv("PORT", "8080"),
+		GoogleAPIKey:   mustGetEnv("GOOGLE_API_KEY"),
+		GoogleClientID: getEnv("GOOGLE_CLIENT_ID", "securelink-app"),
+	}
+	client = NewGoogleClient(cfg.GoogleAPIKey, cfg.GoogleClientID)
+}
+
+// Вспомогательные функции (без изменений)
 func getEnv(key, fallback string) string {
 	if value := os.Getenv(key); value != "" {
 		return value
@@ -45,13 +67,6 @@ func mustGetEnv(key string) string {
 	return ""
 }
 
-// Google Client
-type GoogleClient struct {
-	apiKey   string
-	clientID string
-	http     *http.Client
-}
-
 func NewGoogleClient(apiKey, clientID string) *GoogleClient {
 	return &GoogleClient{
 		apiKey:   apiKey,
@@ -61,6 +76,7 @@ func NewGoogleClient(apiKey, clientID string) *GoogleClient {
 }
 
 func (c *GoogleClient) CheckURL(ctx context.Context, url string) (bool, []string, error) {
+	// ... (код метода CheckURL без изменений)
 	reqBody := map[string]interface{}{
 		"client": map[string]string{
 			"clientId":      c.clientID,
@@ -106,11 +122,57 @@ func (c *GoogleClient) CheckURL(ctx context.Context, url string) (bool, []string
 	return len(threats) == 0, threats, nil
 }
 
-// Handlers
-var tmpl *template.Template
+// Главный обработчик для Vercel
+func Handler(w http.ResponseWriter, r *http.Request) {
+	switch r.URL.Path {
+	case "/":
+		handleIndex(w, r)
+	case "/check":
+		handleCheck(w, r)
+	case "/assets/":
+		serveAssets(w, r)
+	default:
+		http.Error(w, "Not Found", http.StatusNotFound)
+	}
+}
 
-func init() {
-	tmpl = template.Must(template.ParseFiles(filepath.Join("templates", "index.html")))
+// Обработчики маршрутов
+func handleIndex(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	if err := tmpl.Execute(w, nil); err != nil {
+		log.Printf("Ошибка рендеринга: %v", err)
+	}
+}
+
+func handleCheck(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	urlStr := r.FormValue("url")
+	if !isValidURL(urlStr) {
+		tmpl.Execute(w, map[string]interface{}{"Error": "Некорректный URL"})
+		return
+	}
+
+	safe, threats, err := client.CheckURL(r.Context(), urlStr)
+	if err != nil {
+		tmpl.Execute(w, map[string]interface{}{"Error": "Ошибка проверки"})
+		return
+	}
+
+	tmpl.Execute(w, map[string]interface{}{
+		"Result":  safe,
+		"Threats": threats,
+	})
+}
+
+func serveAssets(w http.ResponseWriter, r *http.Request) {
+	http.StripPrefix("/assets/", http.FileServer(http.Dir("assets"))).ServeHTTP(w, r)
 }
 
 func isValidURL(u string) bool {
@@ -119,52 +181,4 @@ func isValidURL(u string) bool {
 		return false
 	}
 	return regexp.MustCompile(`^(http(s)?:\/\/)[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$`).MatchString(u)
-}
-
-func indexHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "GET" {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-	tmpl.Execute(w, nil)
-}
-
-func checkHandler(client *GoogleClient) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != "POST" {
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-			return
-		}
-
-		url := r.FormValue("url")
-		if !isValidURL(url) {
-			tmpl.Execute(w, map[string]interface{}{"Error": "Invalid URL"})
-			return
-		}
-
-		safe, threats, err := client.CheckURL(r.Context(), url)
-		if err != nil {
-			tmpl.Execute(w, map[string]interface{}{"Error": "Check failed"})
-			return
-		}
-
-		tmpl.Execute(w, map[string]interface{}{
-			"Result":  safe,
-			"Threats": threats,
-		})
-	}
-}
-
-// Main
-func main() {
-	cfg := loadConfig()
-	client := NewGoogleClient(cfg.GoogleAPIKey, cfg.GoogleClientID)
-
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", indexHandler)
-	mux.HandleFunc("/check", checkHandler(client))
-	mux.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("assets"))))
-
-	log.Printf("Server starting on :%s", cfg.Port)
-	log.Fatal(http.ListenAndServe(":"+cfg.Port, mux))
 }
