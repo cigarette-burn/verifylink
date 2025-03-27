@@ -3,16 +3,17 @@ services:
     name: verifylink
     env: go
     buildCommand: |
-      echo "Установка зависимостей..." &&
-      go mod download &&
+      echo "Текущая директория: $(pwd)" &&
+      echo "Содержимое проекта:" &&
+      ls -la &&
       echo "Сборка приложения..." &&
       cd api &&
-      go build -o ../app ./handler.go &&
-      echo "Проверка шаблонов..." &&
-      ls -la ../templates
+      go build -o ../app handler.go &&
+      echo "Проверка билда:" &&
+      ls -la ../app
     startCommand: ./app
     envVars:
       - key: PORT
         value: "10000"
       - key: GOOGLE_API_KEY
-        value: AIzaSyBs96LPZ_DVk5Kmgj30oKh3jYsXlFa5DNA
+        value: AIzaSyBs96LPZ_Dk5Kmgj30oKh3jYsXlFa5DNA
