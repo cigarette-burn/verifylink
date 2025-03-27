@@ -128,10 +128,21 @@ func init() {
 }
 
 func initTemplates() {
-	// Абсолютный путь для Render
-	absPath := filepath.Join(filepath.Dir("."), "templates", "index.html")
-	tmpl = template.Must(template.New("index").ParseFiles(absPath))
-	log.Printf("Шаблон инициализирован: %s", absPath)
+    // Абсолютный путь для Render
+    absPath := filepath.Join(filepath.Dir("."), "templates", "index.html")
+    
+    // Проверка существования файла
+    if _, err := os.Stat(absPath); err != nil {
+        log.Fatalf("Template file not found: %v", err)
+    }
+
+    // Парсинг с проверкой ошибок
+    var err error
+    tmpl, err = template.ParseFiles(absPath)
+    if err != nil {
+        log.Fatalf("Template parsing error: %v", err)
+    }
+    log.Printf("Template loaded successfully: %s", absPath)
 }
 
 // Обработчики маршрутов
