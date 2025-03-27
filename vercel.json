@@ -3,7 +3,11 @@
   "builds": [
     {
       "src": "main.go",
-      "use": "@vercel/go"
+      "use": "@vercel/go",
+      "config": {
+        "distDir": ".",
+        "includeFiles": ["templates/**", "assets/**"]
+      }
     }
   ],
   "routes": [
@@ -13,7 +17,8 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/"
+      "dest": "/",
+      "methods": ["GET", "POST"]
     }
   ]
 }
