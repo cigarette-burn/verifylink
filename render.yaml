@@ -5,14 +5,11 @@ services:
     buildCommand: |
       echo "Установка зависимостей..." &&
       go mod download &&
-      echo "Копирование шаблонов..." &&
-      mkdir -p templates &&
-      cp -r ./templates/* ./api/templates/ &&
       echo "Сборка приложения..." &&
       cd api &&
-      go build -o ../app &&
-      echo "Настройка прав..." &&
-      chmod -R 755 ../templates
+      go build -o ../app ./handler.go &&
+      echo "Проверка шаблонов..." &&
+      ls -la ../templates
     startCommand: ./app
     envVars:
       - key: PORT
