@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SecureLink | Проверка URL на угрозы</title>
+    <link rel="stylesheet" href="/assets/css/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="glass-container">
+      <!-- Анимированный фон -->
+      <div class="particles"></div>
+
+      <!-- Главный контент -->
+      <div class="content">
+        <div class="logo">
+          <i class="fas fa-shield-alt"></i>
+          <span>SecureLink</span>
+        </div>
+
+        <div class="card">
+          <h1>Проверка URL на угрозы</h1>
+          <p class="subtitle">
+            Защитите себя от вредоносных сайтов в реальном времени
+          </p>
+
+          <form id="scanForm" method="POST" action="/check">
+            <div class="input-group">
+              <input
+                type="url"
+                name="url"
+                placeholder="https://example.com"
+                required
+              />
+              <button type="submit" class="scan-button">
+                <span>Проверить</span>
+                <i class="fas fa-search"></i>
+              </button>
+            </div>
+          </form>
+
+          {{if .Error}}
+          <div class="alert error">
+            <i class="fas fa-exclamation-circle"></i>
+            <span>{{.Error}}</span>
+          </div>
+          {{end}} {{if .Result}}
+          <div
+            class="result-container {{if not .Result}}danger{{else}}safe{{end}}"
+          >
+            <div class="result-header">
+              <i
+                class="fas {{if .Result}}fa-check-circle{{else}}fa-exclamation-triangle{{end}}"
+              ></i>
+              <h2>
+                {{if .Result}}Безопасная ссылка{{else}}Обнаружена угроза!{{end}}
+              </h2>
+            </div>
+
+            {{if .Threats}}
+            <div class="threats-list">
+              <h3>Обнаруженные угрозы:</h3>
+              <ul>
+                {{range .Threats}}
+                <li><i class="fas fa-bug"></i> {{.}}</li>
+                {{end}}
+              </ul>
+            </div>
+            {{end}}
+
+            <div class="result-actions">
+              <button onclick="window.location.href='/'">
+                <i class="fas fa-undo"></i> Проверить другую
+              </button>
+            </div>
+          </div>
+          {{end}}
+        </div>
+
+        <div class="features">
+          <div class="feature">
+            <i class="fas fa-bolt"></i>
+            <h3>Проверка в реальном времени</h3>
+            <p>
+              Мгновенное обнаружение угроз с использованием базы данных Google
+              Safe Browsing
+            </p>
+          </div>
+          <div class="feature">
+            <i class="fas fa-lock"></i>
+            <h3>Корпоративная защита</h3>
+            <p>Защита военного уровня от фишинга и вредоносных программ</p>
+          </div>
+          <div class="feature">
+            <i class="fas fa-chart-line"></i>
+            <h3>Подробный анализ</h3>
+            <p>Детальные отчеты об угрозах и рекомендации по безопасности</p>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        <div class="footer-content">
+          <div class="footer-logo">
+            <i class="fas fa-shield-alt"></i>
+            <span>SecureLink</span>
+          </div>
+          <p class="copyright">© 2023 SecureLink</p>
+          <div class="footer-links">
+            <a href="#"><i class="fab fa-github"></i></a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
+            <a href="#"><i class="fas fa-envelope"></i></a>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <script src="/assets/js/app.js"></script>
+    <!-- Эффект пузырьков -->
+    <div class="bubbles">
+      <div class="bubble"></div>
+      <div class="bubble"></div>
+      <div class="bubble"></div>
+      <div class="bubble"></div>
+    </div>
+  </body>
+</html>
